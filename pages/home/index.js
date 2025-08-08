@@ -7,9 +7,11 @@ import { Title } from 'components/intro'
 import { Link } from 'components/link'
 import { ListItem } from 'components/list-item'
 import { projects } from 'content/projects'
+import { projectsGsap } from 'content/projectsGsap'
+import CardGsap from 'components/gsap-cards/CardGsap'
 import { useScroll } from 'hooks/use-scroll'
 import { Layout } from 'layouts/default'
-import { button, useControls } from 'leva'
+// import { button, useControls } from 'leva'
 import { clamp, mapRange } from 'lib/maths'
 import { useStore } from 'lib/store'
 import dynamic from 'next/dynamic'
@@ -48,13 +50,33 @@ const WebGL = dynamic(
   { ssr: false }
 )
 
-const HeroTextIn = ({ children, introOut }) => {
-  return (
-    <div className={cn(s['hide-text'], introOut && s['show-text'])}>
-      {children}
-    </div>
-  )
-}
+const MobileHeroWebGL = dynamic(
+  () => import('components/webgl/mobile-hero').then(({ MobileHeroWebGL }) => MobileHeroWebGL),
+  { ssr: false }
+)
+
+const HeroMobileWebGLWrapper = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 800);
+    };
+    
+    // Vérifie initialement
+    checkIfMobile();
+    
+    // Ajoute un écouteur d'événement pour les changements de taille
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Nettoie l'écouteur d'événement
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+  
+  if (!isMobile) return null;
+  
+  return <MobileHeroWebGL render={true} />;
+};
 
 if (typeof window !== 'undefined') {
   window.history.scrollRestoration = 'manual'
@@ -71,43 +93,43 @@ export default function Home() {
   const [theme, setTheme] = useState('dark')
   const lenis = useStore(({ lenis }) => lenis)
 
-  useControls(
-    'lenis',
-    () => ({
-      stop: button(() => {
-        lenis.stop()
-      }),
-      start: button(() => {
-        lenis.start()
-      }),
-    }),
-    [lenis]
-  )
+  // useControls(
+  //   'lenis',
+  //   () => ({
+  //     stop: button(() => {
+  //       lenis.stop()
+  //     }),
+  //     start: button(() => {
+  //       lenis.start()
+  //     }),
+  //   }),
+  //   [lenis]
+  // )
 
-  useControls(
-    'scrollTo',
-    () => ({
-      immediate: button(() => {
-        lenis.scrollTo(30000, { immediate: true })
-      }),
-      smoothDuration: button(() => {
-        lenis.scrollTo(30000, { lock: true, duration: 10 })
-      }),
-      smooth: button(() => {
-        lenis.scrollTo(30000)
-      }),
-      forceScrollTo: button(() => {
-        lenis.scrollTo(30000, { force: true })
-      }),
-    }),
-    [lenis]
-  )
+  // useControls(
+  //   'scrollTo',
+  //   () => ({
+  //     immediate: button(() => {
+  //       lenis.scrollTo(30000, { immediate: true })
+  //     }),
+  //     smoothDuration: button(() => {
+  //       lenis.scrollTo(30000, { lock: true, duration: 10 })
+  //     }),
+  //     smooth: button(() => {
+  //       lenis.scrollTo(30000)
+  //     }),
+  //     forceScrollTo: button(() => {
+  //       lenis.scrollTo(30000, { force: true })
+  //     }),
+  //   }),
+  //   [lenis]
+  // )
 
   useEffect(() => {
     if (!lenis) return
 
     function onClassNameChange(lenis) {
-      console.log(lenis.className)
+  // console.log(lenis.className)
     }
 
     lenis.on('className change', onClassNameChange)
@@ -192,12 +214,12 @@ export default function Home() {
   }, [lenis?.limit])
 
   useScroll((e) => {
-    console.log(window.scrollY, e.scroll, e.isScrolling, e.velocity, e.isLocked)
+  // console.log(window.scrollY, e.scroll, e.isScrolling, e.velocity, e.isLocked)
   })
 
-  useFrame(() => {
-    console.log('frame', window.scrollY, lenis?.scroll, lenis?.isScrolling)
-  }, 1)
+  // useFrame(() => {
+  //   console.log('frame', window.scrollY, lenis?.scroll, lenis?.isScrolling)
+  // }, 1)
 
   const inUseRef = useRef()
 
@@ -227,7 +249,7 @@ export default function Home() {
 
       <Modal />
 
-      <section className={s.hero}>
+  <section className={s.hero}>
         <div className="layout-grid-inner">
           <Title className={s.title} />
           {/* <SFDR className={cn(s.icon, introOut && s.show)} /> */}
@@ -241,6 +263,10 @@ export default function Home() {
               </h2>
             </HeroTextIn>
           </span>
+        </div>
+
+        <div className={s.heroMobileCanvas}>
+          <HeroMobileWebGLWrapper />
         </div>
 
         <div className={cn(s.bottom, 'layout-grid')}>
@@ -271,6 +297,7 @@ export default function Home() {
             </HeroTextIn>
           </h1>
           
+          
           <div style={{ gridColumn: '-1', display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               className={cn(s.cta, s.documentation, introOut && s.in)}
@@ -284,52 +311,50 @@ export default function Home() {
         </div>
       </section>
 
+      <section className={cn(s.gsapCardsSection, 'theme-light')}>
+        <div className="layout-grid-inner">
+          <h2 className={cn('h2')} style={{gridColumn: '3 / span 8', textAlign: 'center', marginBottom: '2rem'}}>LINE UP</h2>
+          <div style={{gridColumn: '3 / span 8', width: '100%'}}>
+            {projectsGsap.map((project, i) => (
+              <CardGsap key={`gsap_${i}`} {...project} i={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className={s.why} data-lenis-scroll-snap-align="start">
         <div className="layout-grid">
           <h2 className={cn(s.sticky, 'h2')}>
-            <AppearTitle>Why smooth scroll?</AppearTitle>
+            <AppearTitle>Pourquoi ARENA 17 ?</AppearTitle>
           </h2>
           <aside className={s.features} ref={whyRectRef}>
             <div className={s.feature}>
               <p className="p">
-                We’ve heard all the reasons to not use smooth scroll. It feels
-                hacky. It’s inaccessible. It’s not performant. It’s
-                over-engineered. And historically, those were all true. But we
-                like to imagine things as they could be, then build them. So,
-                why should you use smooth scroll?
+                Le 17 janvier 2026, on se retrouve à la GLAZ ARENA pour une nuit 100 % hard techno. Une seule scène, 4 500 personnes, et l’envie de vivre quelque chose de simple et fort : être ensemble, danser, et se souvenir.
               </p>
             </div>
             <div className={s.feature}>
               <h3 className={cn(s.title, 'h4')}>
-                Create more immersive interfaces
+                GLAZ ARENA
               </h3>
               <p className="p">
-                Unlock the creative potential and impact of your web
-                experiences. Smoothing the scroll pulls users into the flow of
-                the experience that feels so substantial that they forget
-                they’re navigating a web page.
+              La GLAZ ARENA, c’est de l’espace, du confort, et une acoustique solide. On y installe notre mainstage et tout ce qu’il faut pour que la musique prenne toute la place.
               </p>
             </div>
             <div className={s.feature}>
               <h3 className={cn(s.title, 'h4')}>
-                Normalize all your user inputs
+                Unir le public
               </h3>
               <p className="p">
-                Give all your users the same (dope) experience whether they’re
-                using trackpads, mouse wheels, or otherwise. With smooth scroll,
-                you control how silky, heavy, or responsive the experience
-                should be — no matter the input. Magic!
+              Peu importe d’où tu viens, qui tu es ou comment tu danses : ici, tout le monde est le bienvenu. ARENA 17 est un espace ouvert, LGBT+ friendly et respectueux. On veut que chacun puisse profiter de la musique en toute sécurité, entouré d’une foule qui partage les mêmes valeurs de bienveillance et de liberté.
               </p>
             </div>
             <div className={s.feature}>
               <h3 className={cn(s.title, 'h4')}>
-                Make your animations flawless
+                Vivre la nuit ensemble
               </h3>
               <p className="p">
-                Synchronization with native scroll is not reliable. Those jumps
-                and delays with scroll-linked animations are caused by
-                multi-threading, where modern browsers run animations/effects
-                asynchronously with the scroll. Smooth scroll fixes this.
+                On n’est pas là seulement pour écouter de la musique, mais pour partager un moment. Que tu viennes seul ou avec ta bande, tu trouveras toujours quelqu’un pour danser à tes côtés. Ici, on vit la nuit ensemble, du premier kick au dernier.
               </p>
             </div>
           </aside>
@@ -340,31 +365,22 @@ export default function Home() {
           <div className={s.highlight} data-lenis-scroll-snap-align="start">
             <Parallax speed={-0.5}>
               <p className="h2">
-                <AppearTitle>Rethinking smooth scroll</AppearTitle>
+                <AppearTitle>L’histoire de FUTUR</AppearTitle>
               </p>
             </Parallax>
           </div>
           <div className={s.comparison}>
             <Parallax speed={0.5}>
-              <p className="p">
-                We have to give props to libraries like{' '}
-                <Link
-                  className="contrast semi-bold"
-                  href="https://github.com/locomotivemtl/locomotive-scroll"
-                >
-                  Locomotive Scroll
-                </Link>{' '}
-                and{' '}
-                <Link
-                  className="contrast semi-bold"
-                  href="https://greensock.com/docs/v3/Plugins/ScrollSmoother"
-                >
-                  GSAP ScrollSmoother
-                </Link>
-                . They’re well built and well documented – and we’ve used them a
-                lot. But they still have issues that keep them from being
-                bulletproof.
-              </p>
+            <p className="p">
+              <span className="contrast semi-bold">FUTUR</span> est né à Rennes avec une idée simple : créer des soirées qui marquent. 
+              Depuis notre première date <span className="contrast semi-bold">FUTUR IS ALIVE</span> en juin 2024, 
+              on investit des lieux emblématiques pour les transformer le temps d’une nuit. 
+              Chaque événement a son identité, son ambiance et son line-up pensé avec soin. 
+              De <span className="contrast semi-bold">ABSTRACT</span> à <span className="contrast semi-bold">ENDLESS </span> 
+              en passant par <span className="contrast semi-bold">ETERNITY</span>, 
+              on avance toujours avec le même objectif : rassembler autour de la musique électronique 
+              et proposer quelque chose de différent.
+            </p>
             </Parallax>
           </div>
         </div>
@@ -373,27 +389,27 @@ export default function Home() {
             <Card
               className={s.card}
               number="01"
-              text="Loss of performance budget due to using CSS transforms"
+              text="GLAZ ARENA, 4 500 personnes, une acoustique à la hauteur."
             />
             <Card
               className={s.card}
               number="02"
-              text="Inaccessibility from no page search support and native scrollbar"
+              text="10 artistes, un mélange de grands noms et de découvertes."
             />
             <Card
               className={s.card}
               number="03"
-              text="Non-negligible import costs (12.1kb - 24.34kb gzipped)"
+              text="Pas de détour, une nuit 100 % kicks et énergie brute."
             />
             <Card
               className={s.card}
               number="04"
-              text="Limited animation systems for complex, scroll-based animations"
+              text="Une safe place, LGBT+ friendly et respectueux."
             />
             <Card
               className={s.card}
               number="05"
-              text="Erasing native APIs like Intersection-Observer, CSS Sticky, etc."
+              text="Visuels inspirés du cyberpunk, lumière et son pensés ensemble."
             />
           </HorizontalSlides>
         </div>
@@ -408,32 +424,25 @@ export default function Home() {
         <div className={s.inner}>
           <div className={s.zoom}>
             <h2 className={cn(s.first, 'h1 vh')}>
-              so we built <br />
-              <span className="contrast">web scrolling</span>
+              so we dance <br />
+              <span className="contrast">hard techno</span>
             </h2>
             <h2 className={cn(s.enter, 'h3 vh')}>
-              Enter <br /> Lenis
+              Enter <br /> ARENA 17
             </h2>
-            <h2 className={cn(s.second, 'h1 vh')}>As it should be</h2>
+            <h2 className={cn(s.second, 'h1 vh')}>as it should be</h2>
           </div>
         </div>
       </section>
       <section className={cn('theme-light', s.featuring)} ref={whiteRectRef}>
         <div className={s.inner}>
-          <div className={cn('layout-block', s.intro)}>
-            <p className="p-l">
-              Lenis is an{' '}
-              <Link
-                className="contrast semi-bold"
-                href="https://github.com/darkroomengineering/lenis"
-              >
-                open-source library
-              </Link>{' '}
-              built to standardize scroll experiences and sauce up websites with
-              butter-smooth navigation, all while using the platform and keeping
-              it accessible.
-            </p>
-          </div>
+            <div className={cn('layout-block', s.intro)} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}>
+              <div className={s['shotgun-card']}>
+                <h2 className={"h2 " + s['shotgun-title']}>Billetterie</h2>
+                <iframe src="https://shotgun.live/events/insolenss-x-futur-w-cera-khin?embedded=1&ui=" allow="payment" />
+                <script src="https://shotgun.live/widget.js"></script>
+              </div>
+            </div>
         </div>
         <section ref={featuresRectRef}>
           <FeatureCards />
@@ -446,30 +455,7 @@ export default function Home() {
         }}
         className={cn('theme-light', s['in-use'], visible && s.visible)}
       >
-        <div className="layout-grid">
-          <aside className={s.title}>
-            <p className="h3">
-              <AppearTitle>
-                Lenis
-                <br />
-                <span className="grey">in use</span>
-              </AppearTitle>
-            </p>
-          </aside>
-          <ul className={s.list}>
-            {projects.map(({ title, source, href }, i) => (
-              <li key={i}>
-                <ListItem
-                  title={title}
-                  source={source}
-                  href={href}
-                  index={i}
-                  visible={visible}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+        
       </section>
     </Layout>
   )

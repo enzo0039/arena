@@ -185,13 +185,13 @@ function BackgroundShader() {
 const steps = [
   {
     position: [-0.1, -1.75, 0],
-    scale: 0.135, // Augmenté de 0.045 à 0.135
+    scale: 0.2,
     rotation: [0, Math.PI * 0.5, 0],
     type: 1,
   },
   {
-    position: [0.15, -0.4, 0],
-    scale: 0.06, // Augmenté de 0.02 à 0.06
+    position: [0.15, 1, 0],
+    scale: 0.1, // Augmenté de 0.02 à 0.06
     rotation: [
       MathUtils.degToRad(-45),
       MathUtils.degToRad(-135),
@@ -201,7 +201,7 @@ const steps = [
   },
   {
     position: [0.15, -0.4, 0],
-    scale: 0.06, // Augmenté de 0.02 à 0.06
+    scale: 0.1, // Augmenté de 0.02 à 0.06
     rotation: [
       MathUtils.degToRad(45),
       MathUtils.degToRad(-315),
@@ -211,7 +211,7 @@ const steps = [
   },
   {
     position: [-0.2, -0.35, 0],
-    scale: 0.06, // Augmenté de 0.02 à 0.06
+    scale: 0.1, // Augmenté de 0.02 à 0.06
     rotation: [
       MathUtils.degToRad(-90),
       MathUtils.degToRad(-405),
@@ -296,8 +296,6 @@ const material = new MeshPhysicalMaterial({
 export function Arm() {
   const { scene: arm1 } = useGLTF('/models/logo_futur.glb')
   const { scene: arm2 } = useGLTF('/models/logo_futur.glb')
-  // Ajoutez votre nouveau modèle ici
-  // const { scene: yourModel } = useGLTF('/models/votre-modele.glb')
   const [type, setType] = useState(1)
 
   const [{ color, roughness, metalness, wireframe }, setMaterial] = useControls(
@@ -359,7 +357,7 @@ export function Arm() {
         value: 1,
         max: 1,
       },
-      lightsColor: '#FF98A2',
+      lightsColor: '#ffffffff',
       ambientColor: '#0E0E0E',
     }),
     []
